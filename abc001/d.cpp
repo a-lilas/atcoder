@@ -16,68 +16,38 @@ int main(){
     int N;
     vector<int> S, E;
     vector<int> S_ans, E_ans;
-    queue<int> Sq, Eq;
     string input;
     cin >> N;
 
     REP(i, N){
         cin >> input;
-        S.push_back(stoi(input.substr(0, 4)));
-        E.push_back(stoi(input.substr(5, 9)));
+        S.push_back(60*stoi(input.substr(0, 2)) + stoi(input.substr(2, 2)));
+        E.push_back(60*stoi(input.substr(5, 2)) + stoi(input.substr(7, 2)));
         S[i] -= (S[i] % 5);
         if (E[i] % 5 != 0) E[i] += (5 - (E[i] % 5));
-        if (S[i] % 100 == 60) S[i] += 40;
-        if (E[i] % 100 == 60) E[i] += 40;
     }
 
-    sort(S.begin(), S.end());
-    sort(E.begin(), E.end());
+    int im[60*24+1] = {0};
 
     REP(i, N){
-        Sq.push(S[i]);
-        Eq.push(E[i]);
+        im[S[i]] += 1;
+        im[E[i]] += -1;
     }
 
-    int cnt = 0;
-
-    while(!Eq.empty()){
-        if (Sq.empty()){
-            while (cnt > 1){
-                Eq.pop();
-                cnt--;
-            }
-            E_ans.push_back(Eq.front());
-            Eq.pop();
-            cnt--;
-            continue;
-        }
-
-        if (Sq.front() == Eq.front()){
-            Eq.pop();
-            Sq.pop();
-        }else if (Sq.front() < Eq.front()){
-            if (cnt == 0){
-                S_ans.push_back(Sq.front());
-                Sq.pop();
-                cnt++;
-            }
-            while (!Sq.empty() && Sq.front() < Eq.front()){
-                Sq.pop();
-                cnt++;
-            }
-        }else{
-            while (cnt > 1){
-                Eq.pop();
-                cnt--;
-            }
-            E_ans.push_back(Eq.front());
-            Eq.pop();
-            cnt--;
-        }
+    if (im[0] > 0) S_ans.push_back(0);
+    for(int i=1; i<=60*24; ++i){
+        im[i] += im[i-1];
+        if(im[i] > 0 && im[i-1] == 0) S_ans.push_back(i);
+        if(im[i] == 0 && im[i-1] > 0) E_ans.push_back(i);
     }
+    if(im[60*24] > 0) E_ans.push_back(60*24);
+
     REP(i, S_ans.size()){
-        cout << setfill('0') << right << setw(4) << S_ans[i];
+        cout << setfill('0') << right << setw(2) << (S_ans[i] / 60);
+        cout << setfill('0') << right << setw(2) << (S_ans[i] % 60);
         cout << "-";
-        cout << setfill('0') << right << setw(4) << E_ans[i] << endl;
+        cout << setfill('0') << right << setw(2) << (E_ans[i] / 60);
+        cout << setfill('0') << right << setw(2) << (E_ans[i] % 60);
+        cout << endl;
     }
 }
